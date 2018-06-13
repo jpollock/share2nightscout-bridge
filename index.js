@@ -302,14 +302,14 @@ function engine (opts) {
     if (glucose) {
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
-      //console.log('Entries', entries);
-        // Send data to Nightscout.
-      report_to_pubnub(entries, function (status, response) {
-        console.log("PubNub send", 'status', status, 'response', response);
-      });
+      if (len(entries) > 0) {
+          // Send data to Pubnub.
+        report_to_pubnub(entries, function (status, response) {
+          console.log("PubNub send", 'status', status, 'response', response);
+        });
+
+      }
     }
-
-
   }
 
   my( );
