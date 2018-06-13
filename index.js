@@ -302,8 +302,8 @@ function engine (opts) {
     if (glucose) {
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
-      if (len(entries) > 0) {
-          // Send data to Pubnub.
+      if (entries.length > 0 && entries.length < 10 ) {
+        // Send data to Pubnub.
         report_to_pubnub(entries, function (status, response) {
           console.log("PubNub send", 'status', status, 'response', response);
         });
