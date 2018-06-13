@@ -25,7 +25,7 @@
 var request = require('request');
 var qs = require('querystring');
 var crypto = require('crypto');
-
+var PubNub = require('pubnub');
 
 // Defaults
 var server = "share1.dexcom.com"
@@ -71,6 +71,13 @@ var Trends = (function ( ) {
   });
   return trends;
 })( );
+
+
+var pubnub = new PubNub({
+  publishKey : readENV('PUBNUB_PUBLISH_KEY'),
+  subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY'),
+})
+
 function directionToTrend (direction) {
   var trend = 8;
   if (direction in DIRECTIONS) {
@@ -186,6 +193,21 @@ function report_to_nightscout (opts, then) {
 
 }
 
+// Record data into Pubnub.
+function report_to_pubnub (opts, then) {
+  var publishConfig = {
+      channel : readENV('PUBNUB_CHANNEL')
+  }
+
+  publishConfig.message = {
+      entries: opts
+  }
+
+  return pubnub.publish(publishConfig, then);
+
+
+}
+
 function nullify_battery_status (opts, then) {
   var shasum = crypto.createHash('sha1');
   var hash = shasum.update(opts.API_SECRET);
@@ -213,8 +235,10 @@ function engine (opts) {
       }
       fetch_opts.sessionID = my.sessionID;
       fetch(fetch_opts, function (err, res, glucose) {
+        console.log(res.statusCode);
         if (res.statusCode < 400) {
-          to_nightscout(glucose);
+          //to_nightscout(glucose);
+          to_pubnub(glucose);
         } else {
           my.sessionID = null;
           refresh_token( );
@@ -273,6 +297,21 @@ function engine (opts) {
     }
   }
 
+  function to_pubnub (glucose) {
+    console.log(glucose);
+    if (glucose) {
+      // Translate to Nightscout data.
+      var entries = glucose.map(dex_to_entry);
+      //console.log('Entries', entries);
+        // Send data to Nightscout.
+      report_to_pubnub(entries, function (status, response) {
+        console.log("PubNub send", 'status', status, 'response', response);
+      });
+    }
+
+
+  }
+
   my( );
   return my;
 }
@@ -317,7 +356,7 @@ if (!module.parent) {
   };
   var ns_config = {
     API_SECRET: readENV('API_SECRET')
-  , endpoint: readENV('NS', 'https://' + readENV('WEBSITE_HOSTNAME'))
+  , endpoint: readENV('NS', 'http://' + readENV('WEBSITE_HOSTNAME'))
   };
   var interval = readENV('SHARE_INTERVAL', 60000 * 2.5);
   var fetch_config = { maxCount: readENV('maxCount', 1)
@@ -366,4 +405,3 @@ if (!module.parent) {
       break;
   }
 }
-

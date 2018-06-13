@@ -9,6 +9,7 @@
   "author": "Ben West",
   "license": "GPLv3",
   "dependencies": {
+    "pubnub": "^4.21.1",
     "request": "~2.53.0"
   },
   "repository": {
