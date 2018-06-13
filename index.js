@@ -237,7 +237,7 @@ function engine (opts) {
       fetch(fetch_opts, function (err, res, glucose) {
         console.log(res.statusCode);
         if (res.statusCode < 400) {
-          //to_nightscout(glucose);
+          to_nightscout(glucose);
           to_pubnub(glucose);
         } else {
           my.sessionID = null;
