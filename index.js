@@ -72,7 +72,7 @@ var Trends = (function ( ) {
   return trends;
 })( );
 
-
+console.log(readENV('PUBNUB_AUTH_KEY'))
 var pubnub = new PubNub({
   publishKey : readENV('PUBNUB_PUBLISH_KEY'),
   subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY'),
