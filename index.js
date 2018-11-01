@@ -76,6 +76,7 @@ var Trends = (function ( ) {
 var pubnub = new PubNub({
   publishKey : readENV('PUBNUB_PUBLISH_KEY'),
   subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY'),
+  authKey : readENV('PUBNUB_AUTH_KEY')
 })
 
 function directionToTrend (direction) {
