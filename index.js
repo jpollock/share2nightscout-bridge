@@ -72,12 +72,12 @@ var Trends = (function ( ) {
   return trends;
 })( );
 
-console.log(readENV('PUBNUB_AUTH_KEY'))
 var pubnub = new PubNub({
   publishKey : readENV('PUBNUB_PUBLISH_KEY'),
-  subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY'),
-  authKey : readENV('PUBNUB_AUTH_KEY')
+  subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY')
 })
+pubnub.setAuthKey(readENV('PUBNUB_AUTH_KEY'))
+pubnub.setUUID(readENV('PUBNUB_AUTH_KEY') + '-Nightscout')
 
 function directionToTrend (direction) {
   var trend = 8;
@@ -231,14 +231,14 @@ function engine (opts) {
     if (my.sessionID) {
       var fetch_opts = Object.create(opts.fetch);
       if (runs === 0) {
-        console.log('First run, fetching', opts.firstFetchCount);
+        //console.log('First run, fetching', opts.firstFetchCount);
         fetch_opts.maxCount = opts.firstFetchCount;
       }
       fetch_opts.sessionID = my.sessionID;
       fetch(fetch_opts, function (err, res, glucose) {
-        console.log(res.statusCode);
+        //console.log(res.statusCode);
         if (res.statusCode < 400) {
-          to_nightscout(glucose);
+          //to_nightscout(glucose);
           to_pubnub(glucose);
         } else {
           my.sessionID = null;
@@ -274,7 +274,7 @@ function engine (opts) {
       runs++;
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
-      console.log('Entries', entries);
+      //console.log('Entries', entries);
       if (opts && opts.callback && opts.callback.call) {
         opts.callback(null, entries);
       }
@@ -299,7 +299,7 @@ function engine (opts) {
   }
 
   function to_pubnub (glucose) {
-    console.log(glucose);
+    //console.log(glucose);
     if (glucose) {
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
@@ -384,11 +384,11 @@ if (!module.parent) {
     case 'run':
       // Authorize and fetch from Dexcom.
       do_everything(meta, function (err, glucose) {
-        console.log('From Dexcom', err, glucose);
+        //console.log('From Dexcom', err, glucose);
         if (glucose) {
           // Translate to Nightscout data.
           var entries = glucose.map(dex_to_entry);
-          console.log('Entries', entries);
+          //console.log('Entries', entries);
           if (ns_config.endpoint) {
             ns_config.entries = entries;
             // Send data to Nightscout.
