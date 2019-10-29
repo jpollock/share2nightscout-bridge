@@ -27,17 +27,16 @@ var qs = require('querystring');
 var crypto = require('crypto');
 var PubNub = require('pubnub');
 
+
 // Defaults
-var server = "share1.dexcom.com"
+var server = "share1.dexcom.com";
 var bridge = readENV('BRIDGE_SERVER')
     if (bridge && bridge.indexOf(".") > 1) {
     server = bridge;
    } 
     else if (bridge && bridge === 'EU') {
         server = "shareous1.dexcom.com";
-    } else {
-        server = "share1.dexcom.com";
-    }
+    } 
 
 var Defaults = {
   "applicationId":"d89443d2-327c-4a6f-89e5-496bbb0317db"
@@ -51,6 +50,14 @@ var Defaults = {
 , nightscout_battery: '/api/v1/devicestatus.json'
 , MIN_PASSPHRASE_LENGTH: 12
 };
+
+var pubnub = new PubNub({
+  publishKey : readENV('PUBNUB_PUBLISH_KEY'),
+  subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY')
+})
+pubnub.setAuthKey(readENV('PUBNUB_AUTH_KEY'))
+pubnub.setUUID(readENV('PUBNUB_AUTH_KEY') + '-Nightscout')
+
 
 var DIRECTIONS = {
   NONE: 0
@@ -71,14 +78,6 @@ var Trends = (function ( ) {
   });
   return trends;
 })( );
-
-var pubnub = new PubNub({
-  publishKey : readENV('PUBNUB_PUBLISH_KEY'),
-  subscribeKey : readENV('PUBNUB_SUBSCRIBE_KEY')
-})
-pubnub.setAuthKey(readENV('PUBNUB_AUTH_KEY'))
-pubnub.setUUID(readENV('PUBNUB_AUTH_KEY') + '-Nightscout')
-
 function directionToTrend (direction) {
   var trend = 8;
   if (direction in DIRECTIONS) {
@@ -231,14 +230,13 @@ function engine (opts) {
     if (my.sessionID) {
       var fetch_opts = Object.create(opts.fetch);
       if (runs === 0) {
-        //console.log('First run, fetching', opts.firstFetchCount);
+        console.log('First run, fetching', opts.firstFetchCount);
         fetch_opts.maxCount = opts.firstFetchCount;
       }
       fetch_opts.sessionID = my.sessionID;
       fetch(fetch_opts, function (err, res, glucose) {
-        //console.log(res.statusCode);
-        if (res.statusCode < 400) {
-          //to_nightscout(glucose);
+        if (res && res.statusCode < 400) {
+          to_nightscout(glucose);
           to_pubnub(glucose);
         } else {
           my.sessionID = null;
@@ -254,13 +252,14 @@ function engine (opts) {
   function refresh_token ( ) {
     console.log('Fetching new token');
     authorize(opts.login, function (err, res, body) {
-      if (!err && body && res.statusCode == 200) {
+      if (!err && body && res && res.statusCode == 200) {
         my.sessionID = body;
         failures = 0;
         my( );
       } else {
         failures++;
-        console.log("Error refreshing token", err, res.statusCode, body);
+        var responseStatus = res ? res.statusCode : "response not found";
+        console.log("Error refreshing token", err, responseStatus, body);
         if (failures >= opts.maxFailures) {
           throw "Too many login failures, check DEXCOM_ACCOUNT_NAME and DEXCOM_PASSWORD";
         }
@@ -274,7 +273,7 @@ function engine (opts) {
       runs++;
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
-      //console.log('Entries', entries);
+      console.log('Entries', entries);
       if (opts && opts.callback && opts.callback.call) {
         opts.callback(null, entries);
       }
@@ -311,7 +310,7 @@ function engine (opts) {
 
       }
     }
-  }
+  }  
 
   my( );
   return my;
@@ -357,9 +356,10 @@ if (!module.parent) {
   };
   var ns_config = {
     API_SECRET: readENV('API_SECRET')
-  , endpoint: readENV('NS', 'http://' + readENV('WEBSITE_HOSTNAME'))
+  , endpoint: readENV('NS', 'https://' + readENV('WEBSITE_HOSTNAME'))
   };
   var interval = readENV('SHARE_INTERVAL', 60000 * 2.5);
+  interval = Math.max(60000, interval);
   var fetch_config = { maxCount: readENV('maxCount', 1)
     , minutes: readENV('minutes', 1440)
   };
@@ -384,11 +384,11 @@ if (!module.parent) {
     case 'run':
       // Authorize and fetch from Dexcom.
       do_everything(meta, function (err, glucose) {
-        //console.log('From Dexcom', err, glucose);
+        console.log('From Dexcom', err, glucose);
         if (glucose) {
           // Translate to Nightscout data.
           var entries = glucose.map(dex_to_entry);
-          //console.log('Entries', entries);
+          console.log('Entries', entries);
           if (ns_config.endpoint) {
             ns_config.entries = entries;
             // Send data to Nightscout.
@@ -403,6 +403,6 @@ if (!module.parent) {
     default:
       setInterval(engine(meta), interval);
       break;
-      break;
+
   }
 }
