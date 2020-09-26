@@ -37,7 +37,6 @@ var bridge = readENV('BRIDGE_SERVER')
     else if (bridge && bridge === 'EU') {
         server = "shareous1.dexcom.com";
     } 
-
 var Defaults = {
   "applicationId":"d89443d2-327c-4a6f-89e5-496bbb0317db"
 , "agent": "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0"
@@ -121,6 +120,7 @@ function fetch_query (opts) {
   , minutes: opts.minutes || 1440
   , maxCount: opts.maxCount || 1
   };
+
   var url = Defaults.LatestGlucose + '?' + qs.stringify(q);
   return url;
 }
@@ -199,9 +199,7 @@ function report_to_pubnub (opts, then) {
       channel : readENV('PUBNUB_CHANNEL')
   }
 
-  publishConfig.message = {
-      entries: opts
-  }
+  publishConfig.message = opts
 
   return pubnub.publish(publishConfig, then);
 
@@ -291,7 +289,6 @@ function engine (opts) {
         // Send data to Nightscout.
         report_to_nightscout(ns_config, function (err, response, body) {
           console.log("Nightscout upload", 'error', err, 'status', response.statusCode, body);
-
         });
       }
     }
@@ -389,14 +386,18 @@ if (!module.parent) {
           // Translate to Nightscout data.
           var entries = glucose.map(dex_to_entry);
           console.log('Entries', entries);
-          if (ns_config.endpoint) {
+          if (ns_config.endpoint && ns_config.endpoint !== 'https://undefined' ) {
             ns_config.entries = entries;
             // Send data to Nightscout.
             report_to_nightscout(ns_config, function (err, response, body) {
               console.log("Nightscout upload", 'error', err, 'status', response.statusCode, body);
 
-            });
+            });    
           }
+          report_to_pubnub(entries, function (status, response) {
+            console.log("PubNub send", 'status', status, 'response', response);
+          });
+
         }
       });
       break;
