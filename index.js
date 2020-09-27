@@ -302,7 +302,7 @@ function engine (opts) {
       if (entries.length > 0 && entries.length < 10 ) {
         // Send data to Pubnub.
         entries.reverse().forEach(entry => {
-          report_to_pubnub(entries, function (status, response) {
+          report_to_pubnub(entry, function (status, response) {
             console.log("PubNub send", 'status', status, 'response', response);
           });
             
