@@ -301,7 +301,7 @@ function engine (opts) {
       var entries = glucose.map(dex_to_entry);
       if (entries.length > 0 && entries.length < 10 ) {
         // Send data to Pubnub.
-        entries.reverse.forEach(entry => {
+        entries.reverse().forEach(entry => {
           report_to_pubnub(entries, function (status, response) {
             console.log("PubNub send", 'status', status, 'response', response);
           });
