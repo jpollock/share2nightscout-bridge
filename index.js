@@ -200,13 +200,14 @@ function report_to_pubnub (opts, then) {
   }
 
   publishConfig.message = opts
-
+  
+  console.log(opts);
   //return pubnub.publish(publishConfig, then);
   var headers = { 
                 'Content-Type': Defaults['content-type']
                 , 'Accept': Defaults.accept };
   var url = opts.endpoint + Defaults.nightscout_upload;
-  var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts.entries, json: true, headers: headers, method: 'POST'
+  var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
             , rejectUnauthorized: false };
   return request(req, then);
 
@@ -405,11 +406,16 @@ if (!module.parent) {
             });    
           }
           
-          report_to_pubnub(entries, function (status, response) {
-            console.log("PubNub send", 'status', status, 'response', response);
+          entries.reverse().forEach(entry => {
+            report_to_pubnub(entry, function (status, response) {
+              //console.log("PubNub send", 'status', status, 'response', response);
+            });
           });
-
+          /*report_to_pubnub(entries, function (status, response) {
+            console.log("PubNub send", 'status', status, 'response', response);
+          });*/
         }
+        
       });
       break;
     default:
