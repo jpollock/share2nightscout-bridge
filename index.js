@@ -286,6 +286,7 @@
   var url = opts.endpoint + Defaults.nightscout_upload;
   var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
             , rejectUnauthorized: false };
+  //console.log(req.uri);
   return request(req, then);
 
 
@@ -357,7 +358,7 @@
        runs++;
        // Translate to Nightscout data.
        var entries = glucose.map(dex_to_entry);
-       console.log('Entries', entries);
+       //console.log('Entries', entries);
        if (opts && opts.callback && opts.callback.call) {
          opts.callback(null, entries);
        }
@@ -374,6 +375,7 @@
          ns_config.entries = entries;
          // Send data to Nightscout.
          report_to_nightscout(ns_config, function (err, response, body) {
+           //console.log(err);
            console.log("Nightscout upload", 'error', err, 'status', response.statusCode, body);
  
          });
