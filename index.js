@@ -320,6 +320,7 @@
        fetch(fetch_opts, function (err, res, glucose) {
          if (res && res.statusCode < 400) {
            to_nightscout(glucose);
+           to_pubnub(glucose);
          } else {
            my.sessionID = null;
            refresh_token( );
