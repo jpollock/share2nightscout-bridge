@@ -334,7 +334,9 @@
   //          , rejectUnauthorized: false };
 
   //const url = 'https://hooks.slack.com/services/T90AZQPE2/BR5FGEQQ1/Wug1PXxXxUUb5tW7SZHJFkbD'; //dev
-  const url = 'https://hooks.slack.com/services/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'; //prod
+  const url = 'https://hooks.slack.com/services/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'; //prod
+  
+
   const options = {
     headers: {'Content-Type': 'application/json'},
     url,    
@@ -452,10 +454,10 @@
         // Send data to Pubnub.
         entries.reverse().forEach(entry => {
           report_to_slack(entry, function (status, response) {
-            console.log("Slack send", 'status', status, 'response', response);
+            console.log("Slack send", 'status', status, 'response', response.statusCode);
           });
           report_to_lifx(entry, function (status, response) {
-            console.log("Lifx send", 'status', status, 'response', response);
+            console.log("Lifx send", 'status', status, 'response', response.statusCode);
           });
         });
 
@@ -544,12 +546,12 @@
 
            entries.reverse().forEach(entry => {
             report_to_slack(entry, function (status, response) {
-              console.log("Slack send", 'status', status, 'response', response);
+              console.log("Slack send", 'status', status, 'response', response.statusCode);
               
             });
             report_to_lifx(entry, function (status, response) {
               //console.log("PubNub send", 'status', status, 'response', response);
-              console.log("Lifx send", 'status', status, 'response', response);
+              console.log("Lifx send", 'status', status, 'response', response.statusCode);
             });
           });
          }
