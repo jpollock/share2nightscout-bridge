@@ -270,7 +270,7 @@
  }
  
  function report_to_lifx (opts, then) {
-  const token = 'c3f2527007953b5d0216a83ba6664d72ea06f3f61992649de235ba18307abfeb';
+  const token = readENV('LIFX_TOKEN');
   var color = 'blue';
   var brightness = 0.01;
   
@@ -299,7 +299,7 @@
   var body = { color: color, brightness: brightness};
   var body_payload = JSON.stringify(body);
   const options = {
-      uri: 'https://api.lifx.com/v1/lights/all/state',
+      uri: readENV('LIFX_URL'),
       headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token,
@@ -333,8 +333,7 @@
   //var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
   //          , rejectUnauthorized: false };
 
-  //const url = 'https://hooks.slack.com/services/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'; //dev
-  const url = 'https://hooks.slack.com/services/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'; //prod
+  const url = readENV('SLACK_CHANNEL_WEBHOOK'); //prod
   
 
   const options = {
@@ -346,8 +345,6 @@
 
 };  
   
-  var req = { uri: "https://hooks.slack.com/services/T90AZQPE2/BR5FGEQQ1/Wug1PXxXxUUb5tW7SZHJFkb", body: opts, json: true, headers: headers, method: 'POST'
-            , rejectUnauthorized: false }; 
   console.log(options);
   return request.post(options, then);
 
