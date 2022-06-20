@@ -269,25 +269,85 @@
  
  }
  
+ function report_to_lifx (opts, then) {
+  const token = 'c3f2527007953b5d0216a83ba6664d72ea06f3f61992649de235ba18307abfeb';
+  var color = 'blue';
+  var brightness = 0.01;
+  
+  if (opts.sgv > 300) {
+      color = '#8B0000';
+      brightness = 0.75;
+  } else if (opts.sgv > 200) {
+      color = '#8B0000';
+      brightness = 0.02;
+  } else if (opts.sgv > 150) {
+      color = '#008F11';
+      brightness = 0.03;
+  } else if (opts.sgv > 90) {
+      color = '#013220';
+      brightness = 0.01;
+  } else if (opts.sgv > 70) {
+      color = '#B0C4DE';
+      brightness = 0.01;
+  } else if (opts.sgv > 60) {
+      color = '#003EFF';
+      brightness = 0.10;
+  } else {
+      color = '#003EFF';
+      brightness = 0.50;
+  }   
+  var body = { color: color, brightness: brightness};
+  var body_payload = JSON.stringify(body);
+  const options = {
+      uri: 'https://api.lifx.com/v1/lights/all/state',
+      headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+          'Content-Length': body_payload.length
+      },
+      body: body_payload
+
+  };   
+  console.log(opts);
+  return request.put(options, then);  
+ }
  
  // Record data into Pubnub.
- function report_to_pubnub (opts, then) {
+ function report_to_slack (opts, then) {
   var publishConfig = {
       channel : readENV('PUBNUB_CHANNEL')
   }
 
   publishConfig.message = opts
   
-  console.log(opts);
+  //console.log(opts);
   //return pubnub.publish(publishConfig, then);
+
+  var body = {"text": "Latest BG reading: *"+ opts.sgv + "* at " + opts.dateString + ". *" + opts.direction +"* is the direction."};
+  console.log(body);
+  var body_payload = JSON.stringify(body);
+
   var headers = { 
                 'Content-Type': Defaults['content-type']
-                , 'Accept': Defaults.accept };
-  var url = opts.endpoint + Defaults.nightscout_upload;
-  var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
-            , rejectUnauthorized: false };
-  //console.log(req.uri);
-  return request(req, then);
+                , 'Accept': Defaults.accept, 'Content-Length': body_payload.length };
+  //var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
+  //          , rejectUnauthorized: false };
+
+  //const url = 'https://hooks.slack.com/services/T90AZQPE2/BR5FGEQQ1/Wug1PXxXxUUb5tW7SZHJFkbD'; //dev
+  const url = 'https://hooks.slack.com/services/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'; //prod
+  const options = {
+    headers: {'Content-Type': 'application/json'},
+    url,    
+    //form: {payload: body_payload}
+    form: {payload: body_payload}
+  
+
+};  
+  
+  var req = { uri: "https://hooks.slack.com/services/T90AZQPE2/BR5FGEQQ1/Wug1PXxXxUUb5tW7SZHJFkb", body: opts, json: true, headers: headers, method: 'POST'
+            , rejectUnauthorized: false }; 
+  console.log(options);
+  return request.post(options, then);
 
 
 }
@@ -384,17 +444,19 @@
    }
  
    function to_pubnub (glucose) {
-    //console.log(glucose);
+    ///console.log(glucose);
     if (glucose) {
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
       if (entries.length > 0 && entries.length < 10 ) {
         // Send data to Pubnub.
         entries.reverse().forEach(entry => {
-          report_to_pubnub(entry, function (status, response) {
-            console.log("PubNub send", 'status', status, 'response', response);
+          report_to_slack(entry, function (status, response) {
+            //console.log("PubNub send", 'status', status, 'response', response);
           });
-            
+          report_to_lifx(entry, function (status, response) {
+            //console.log("PubNub send", 'status', status, 'response', response);
+          });            
         });
 
       }
@@ -470,7 +532,7 @@
          if (glucose) {
            // Translate to Nightscout data.
            var entries = glucose.map(dex_to_entry);
-           console.log('Entries', entries);
+           //console.log('Entries', entries);
            if (ns_config.endpoint  && ns_config.endpoint !== 'https://undefined') {
              ns_config.entries = entries;
              // Send data to Nightscout.
@@ -481,8 +543,13 @@
            }
 
            entries.reverse().forEach(entry => {
-            report_to_pubnub(entry, function (status, response) {
+            /*report_to_slack(entry, function (status, response) {
               //console.log("PubNub send", 'status', status, 'response', response);
+              console.log(response.statusCode);
+            });*/
+            report_to_lifx(entry, function (status, response) {
+              //console.log("PubNub send", 'status', status, 'response', response);
+              console.log(response);
             });
           });
          }
