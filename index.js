@@ -446,7 +446,8 @@
    }
  
    function to_pubnub (glucose) {
-    ///console.log(glucose);
+     console.log("INTEGRATING!!!!!!");
+     console.log(glucose);
     if (glucose) {
       // Translate to Nightscout data.
       var entries = glucose.map(dex_to_entry);
