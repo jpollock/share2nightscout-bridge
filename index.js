@@ -454,6 +454,7 @@
       if (entries.length > 0 && entries.length < 10 ) {
         // Send data to Pubnub.
         entries.reverse().forEach(entry => {
+          console.log(entry);
           report_to_slack(entry, function (status, response) {
             console.log("Slack send", 'status', status, 'response', response.statusCode);
           });
