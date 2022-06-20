@@ -543,10 +543,10 @@
            }
 
            entries.reverse().forEach(entry => {
-            /*report_to_slack(entry, function (status, response) {
+            report_to_slack(entry, function (status, response) {
               //console.log("PubNub send", 'status', status, 'response', response);
               console.log(response.statusCode);
-            });*/
+            });
             report_to_lifx(entry, function (status, response) {
               //console.log("PubNub send", 'status', status, 'response', response);
               console.log(response);
