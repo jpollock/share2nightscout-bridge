@@ -333,8 +333,8 @@
   //var req = { uri: "https://icy-pond-7077.us-east1.akkaserverless.app/value/patients/olivia", body: opts, json: true, headers: headers, method: 'POST'
   //          , rejectUnauthorized: false };
 
-  //const url = 'https://hooks.slack.com/services/T90AZQPE2/BR5FGEQQ1/Wug1PXxXxUUb5tW7SZHJFkbD'; //dev
-  const url = 'https://hooks.slack.com/services/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'; //prod
+  //const url = 'https://hooks.slack.com/services/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'; //dev
+  const url = 'https://hooks.slack.com/services/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'; //prod
   
 
   const options = {
@@ -436,11 +436,11 @@
          }
          ns_config.entries = entries;
          // Send data to Nightscout.
-         report_to_nightscout(ns_config, function (err, response, body) {
+         /*report_to_nightscout(ns_config, function (err, response, body) {
            //console.log(err);
            console.log("Nightscout upload", 'error', err, 'status', response.statusCode, body);
  
-         });
+         });*/
        }
      }
    }
@@ -548,7 +548,7 @@
 
            entries.reverse().forEach(entry => {
             report_to_slack(entry, function (status, response) {
-              console.log("Slack send", 'status', status, 'response', response.statusCode);
+              console.log("Slack send", 'status', status, 'response', response);
               
             });
             report_to_lifx(entry, function (status, response) {
