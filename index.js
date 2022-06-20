@@ -456,7 +456,7 @@
           });
           report_to_lifx(entry, function (status, response) {
             console.log("Lifx send", 'status', status, 'response', response);
-          });            
+          });
         });
 
       }

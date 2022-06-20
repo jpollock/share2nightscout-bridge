@@ -9,6 +9,8 @@
   "author": "Ben West",
   "license": "GPLv3",
   "dependencies": {
+    "axios": "^0.27.2",
+    "pubnub": "^4.21.1",
     "request": "~2.53.0"
   },
   "repository": {
