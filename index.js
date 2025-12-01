@@ -275,10 +275,10 @@
   var brightness = 0.01;
   
   if (opts.sgv > 300) {
-      color = '#8B0000';
+      color = '#f9bf36ff';
       brightness = 0.75;
   } else if (opts.sgv > 200) {
-      color = '#8B0000';
+      color = '#b9a02fff';
       brightness = 0.02;
   } else if (opts.sgv > 150) {
       color = '#008F11';
@@ -290,10 +290,10 @@
       color = '#B0C4DE';
       brightness = 0.01;
   } else if (opts.sgv > 60) {
-      color = '#003EFF';
+      color = '#f092bcff';
       brightness = 0.10;
   } else {
-      color = '#003EFF';
+      color = '#f092bcff';
       brightness = 0.50;
   }   
   var body = { color: color, brightness: brightness};
